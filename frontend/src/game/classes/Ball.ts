@@ -35,10 +35,10 @@ export class Ball {
       this.ctx.closePath();
     }
   
-    update() {
-      this.vy += gravity;
-      this.x += this.vx;
-      this.y += this.vy;
+    update(deltaTime: number) {
+      this.vy += gravity * deltaTime;
+      this.x += this.vx * deltaTime;
+      this.y += this.vy * deltaTime;
   
       // Collision with obstacles
       this.obstacles.forEach(obstacle => {

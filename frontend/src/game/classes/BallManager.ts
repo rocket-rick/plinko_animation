@@ -7,25 +7,30 @@ export class BallManager {
     private balls: Ball[];
     private canvasRef: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
-    private obstacles: Obstacle[]
-    private sinks: Sink[]
+    private obstacles: Obstacle[];
+    private sinks: Sink[];
     private requestId?: number;
-    private onFinish?: (index: number,startX?: number) => void;
+    private lastTime: number;
+    private speedMultiplier: number;
+    private onFinish?: (index: number, startX?: number) => void;
 
-    constructor(canvasRef: HTMLCanvasElement, onFinish?: (index: number,startX?: number) => void) {
+    constructor(canvasRef: HTMLCanvasElement, onFinish?: (index: number, startX?: number, deltaTime?: number) => void) {
         this.balls = [];
         this.canvasRef = canvasRef;
         this.ctx = this.canvasRef.getContext("2d")!;
         this.obstacles = createObstacles();
         this.sinks = createSinks();
-        this.update();
+        this.lastTime = 0;
+        this.speedMultiplier = 50; // Adjust if needed
         this.onFinish = onFinish;
+        this.gameLoop = this.gameLoop.bind(this);
+        this.start();
     }
 
     addBall(startX?: number) {
         const newBall = new Ball(startX || pad(WIDTH / 2 + 13), pad(50), ballRadius, 'red', this.ctx, this.obstacles, this.sinks, (index) => {
             this.balls = this.balls.filter(ball => ball !== newBall);
-            this.onFinish?.(index, startX)
+            this.onFinish?.(index, startX);
         });
         this.balls.push(newBall);
     }
@@ -41,7 +46,7 @@ export class BallManager {
     }
   
     getColor(index: number) {
-        if (index <3 || index > this.sinks.length - 3) {
+        if (index < 3 || index > this.sinks.length - 3) {
             return {background: '#ff003f', color: 'white'};
         }
         if (index < 6 || index > this.sinks.length - 6) {
@@ -58,10 +63,11 @@ export class BallManager {
         }
         return {background: '#7fff00', color: 'black'};
     }
+
     drawSinks() {
         this.ctx.fillStyle = 'green';
         const SPACING = obstacleRadius * 2;
-        for (let i = 0; i<this.sinks.length; i++)  {
+        for (let i = 0; i < this.sinks.length; i++)  {
             this.ctx.fillStyle = this.getColor(i).background;
             const sink = this.sinks[i];
             this.ctx.font='normal 13px Arial';
@@ -77,13 +83,27 @@ export class BallManager {
         this.drawSinks();
         this.balls.forEach(ball => {
             ball.draw();
-            ball.update();
         });
     }
     
-    update() {
+    update(deltaTime: number) {
+        this.balls.forEach(ball => {
+            ball.update(deltaTime);
+        });
+    }
+
+    gameLoop(timestamp: number) {
+        const deltaTime = (timestamp - this.lastTime) / 1000; // Convert to seconds
+        this.lastTime = timestamp;
+
         this.draw();
-        this.requestId = requestAnimationFrame(this.update.bind(this));
+        this.update(deltaTime * this.speedMultiplier);
+
+        this.requestId = requestAnimationFrame(this.gameLoop);
+    }
+
+    start() {
+        this.requestId = requestAnimationFrame(this.gameLoop);
     }
 
     stop() {
