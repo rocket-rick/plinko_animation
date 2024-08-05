@@ -28,10 +28,20 @@ export class BallManager {
     }
 
     addBall(startX?: number) {
-        const newBall = new Ball(startX || pad(WIDTH / 2 + 13), pad(50), ballRadius, 'red', this.ctx, this.obstacles, this.sinks, (index) => {
-            this.balls = this.balls.filter(ball => ball !== newBall);
-            this.onFinish?.(index, startX);
-        });
+        const newBall = new Ball(
+            4027628.395823398,
+            pad(50),
+            ballRadius,
+            'red',
+            this.ctx,
+            this.obstacles,
+            this.sinks,
+            { x: 208, y: pad(630) }, // Target endpoint
+            (index) => {
+                this.balls = this.balls.filter(ball => ball !== newBall);
+                this.onFinish?.(index, startX);
+            }
+        );
         this.balls.push(newBall);
     }
 
@@ -44,33 +54,35 @@ export class BallManager {
             this.ctx.closePath();
         });
     }
-  
+
     getColor(index: number) {
+        // Color mapping logic remains unchanged
         if (index < 3 || index > this.sinks.length - 3) {
-            return {background: '#ff003f', color: 'white'};
+            return { background: '#ff003f', color: 'white' };
         }
         if (index < 6 || index > this.sinks.length - 6) {
-            return {background: '#ff7f00', color: 'white'};
+            return { background: '#ff7f00', color: 'white' };
         }
         if (index < 9 || index > this.sinks.length - 9) {
-            return {background: '#ffbf00', color: 'black'};
+            return { background: '#ffbf00', color: 'black' };
         }
         if (index < 12 || index > this.sinks.length - 12) {
-            return {background: '#ffff00', color: 'black'};
+            return { background: '#ffff00', color: 'black' };
         }
         if (index < 15 || index > this.sinks.length - 15) {
-            return {background: '#bfff00', color: 'black'};
+            return { background: '#bfff00', color: 'black' };
         }
-        return {background: '#7fff00', color: 'black'};
+        return { background: '#7fff00', color: 'black' };
     }
 
     drawSinks() {
+        // console.log("Drawing sinks", this.sinks)
         this.ctx.fillStyle = 'green';
         const SPACING = obstacleRadius * 2;
-        for (let i = 0; i < this.sinks.length; i++)  {
+        for (let i = 0; i < this.sinks.length; i++) {
             this.ctx.fillStyle = this.getColor(i).background;
             const sink = this.sinks[i];
-            this.ctx.font='normal 13px Arial';
+            this.ctx.font = 'normal 13px Arial';
             this.ctx.fillRect(sink.x, sink.y - sink.height / 2, sink.width - SPACING, sink.height);
             this.ctx.fillStyle = this.getColor(i).color;
             this.ctx.fillText((sink?.multiplier)?.toString() + "x", sink.x - 15 + sinkWidth / 2, sink.y);
@@ -85,7 +97,7 @@ export class BallManager {
             ball.draw();
         });
     }
-    
+
     update(deltaTime: number) {
         this.balls.forEach(ball => {
             ball.update(deltaTime);
