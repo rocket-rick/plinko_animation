@@ -21,7 +21,7 @@ export class BallManager {
         this.obstacles = createObstacles();
         this.sinks = createSinks();
         this.lastTime = 0;
-        this.speedMultiplier = 50; // Adjust if needed
+        this.speedMultiplier = 80; // Adjust if needed
         this.onFinish = onFinish;
         this.gameLoop = this.gameLoop.bind(this);
         this.start();
